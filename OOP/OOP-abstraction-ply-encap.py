@@ -10,7 +10,7 @@ class Character(ABC):
     def get_health(self):
         return self.__health
 
-    def set_health(self, value):
+    def set_health(self, value): #reduce health 
         if value < 0:
             self.__health = 0
         else:
@@ -34,27 +34,37 @@ class Warrior(Character):
     def defend(self, damage):
         reduced = damage - 5
         self.set_health(self.get_health() - reduced)
-        print(f"{self.name} blocks with shield, health now {self.get_health()}")
+        print(f"{self.name} blocks with sword but still takes damage, health now {self.get_health()}")
 
 
 class Mage(Character):
     def attack(self):
-        print(f"{self.name} casts a fireball!")
+        print(f"{self.name} casts a reverse curse technique: RED!")
         return 20
 
     def defend(self, damage):
         reduced = damage - 2
         self.set_health(self.get_health() - reduced)
-        print(f"{self.name} uses magic barrier, health now {self.get_health()}")
+        print(f"{self.name} uses infinite barrier, health now {self.get_health()}")
+
+class Assassin(Character):
+    def attack(self):
+        print(f"{self.name} strikes with a hidden blade!")
+        return 25
+
+    def defend(self, damage):
+        reduced = damage - 2
+        self.set_health(self.get_health() - reduced)
+        print(f"{self.name} dodges but still takes damage, health now {self.get_health()}")
 
 class Archer(Character):
     def attack(self):
-        print(f"{self.name} shoots an arrow!")
+        print(f"{self.name} shoots a blazing arrow!")
         return 10
 
     def defend(self, damage):
         self.set_health(self.get_health() - damage)
-        print(f"{self.name} dodges but still takes damage, health now {self.get_health()}")
+        print(f"{self.name} gets hit but regenerates, health now {self.get_health()}")
 
 class createGaldiatorArena:
     def __init__(self, *character):
@@ -64,6 +74,7 @@ class createGaldiatorArena:
         for chara in self.characters:
             for enemy in self.characters:
                 if chara != enemy:
+                    print(f"\nBattle: {chara.name} vs {enemy.name}")
                     while chara.get_health() > 0 and enemy.get_health() > 0:
                         dmg = chara.attack()
                         enemy.defend(dmg)
@@ -76,16 +87,8 @@ class createGaldiatorArena:
                         if chara.get_health() <= 0:
                             print(f"{chara.name} has fallen! {enemy.name} wins!")
                             break
+                    print("one or two character(s) has fallen, moving to next battle...")
 
-
-class Dragon(Character):
-    def attack(self):
-        print(f"{self.name} shoots an arrow!")
-        return 10
-
-    def defend(self, damage):
-        self.set_health(self.get_health() - damage)
-        print(f"{self.name} dodges but still takes damage, health now {self.get_health()}")
 
 
 # === Game Simulation ===
@@ -110,8 +113,11 @@ def battle(c1, c2):
 
 # === Example Run ===
 warrior = Warrior("Guts (warrior)", 100)
-mage = Mage("Jinwoo (mage)", 80)
+mage = Mage("Gojo (mage)", 80)
 archer = Archer("Sukuna (archer)", 90)
+assassin = Assassin("Jinwoo (assassin)", 85)
 
-battle(warrior, mage)
-battle(mage, archer)
+#battle(warrior, mage)
+#battle(mage, archer)
+arena = createGaldiatorArena(warrior, mage, archer, assassin)
+arena.startwar()
