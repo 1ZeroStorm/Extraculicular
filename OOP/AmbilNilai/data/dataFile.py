@@ -8,7 +8,7 @@ class data:
         self.new_mana = class_management()
         self.new_trans = class_transaction()
 
-    def get_management(self, ):
+    def get_management(self):
         ip_man = input("masukkan pilihan (1/2/3/4)")
         if ip_man == "1":
             print("tambah produk")
