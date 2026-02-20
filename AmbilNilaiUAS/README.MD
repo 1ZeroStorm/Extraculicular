@@ -19,3 +19,4 @@
 - module 1: new database
 - module 2: CRUD
 - base.html
+- layout.html
