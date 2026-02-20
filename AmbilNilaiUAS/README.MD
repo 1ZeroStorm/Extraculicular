@@ -11,12 +11,11 @@
     - frekuensi 3x -> alpha
     - frekuensi 4x -> panggil orang tua
     - frekuensi 5x -> DO
-
-# Isi HTML admin panel (flask
-
-
-)
+## fitur
+- CRUD versi pengisi
+- export data
 
 # modul
-- database
-    - dari html -> database (ngestore semua di UI)
+- module 1: new database
+- module 2: CRUD
+- base.html
