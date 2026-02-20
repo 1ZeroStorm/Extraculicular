@@ -19,7 +19,6 @@ def get_connection(use_database=True):
     cfg = get_db_config()
     params = {
         'host': cfg['host'],
-        'port': cfg['port'],
         'user': cfg['user'],
         'password': cfg['password'],
         'autocommit': False
@@ -54,8 +53,7 @@ def ensure_db():
               absen VARCHAR(50),
               kelas VARCHAR(50),
               violation_type VARCHAR(100),
-              reason TEXT,
-              frequency INT DEFAULT 1
+              reason TEXT
             ) 
             """
         )
@@ -71,6 +69,7 @@ from violation_service import ViolationService
 from views import register_routes
 
 if __name__ == '__main__':
+    ensure_db()  # Create database and tables if they don't exist
     repo = ViolationRepository(get_connection)
     service = ViolationService(repo)
     register_routes(app, service, repo)

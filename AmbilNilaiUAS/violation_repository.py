@@ -1,7 +1,5 @@
 from typing import Callable, Optional, List, Dict
 
-STATUS_MAP = {1: 'Peringatan', 2: 'Wajib Lapor', 3: 'Alpha', 4: 'Panggil Orang Tua', 5: 'DO'}
-
 
 class ViolationRepository:
     """DB operations for violations using a provided `get_connection` callable.
@@ -15,14 +13,13 @@ class ViolationRepository:
     def _row_to_dict(self, row: Optional[Dict]) -> Optional[Dict]:
         if not row:
             return None
-        row['status'] = STATUS_MAP.get(row.get('frequency', 1), 'Tindakan Lain')
         return row
 
     def get_all(self) -> List[Dict]:
         conn = self.get_connection()
         try:
             cur = conn.cursor(dictionary=True)
-            cur.execute('SELECT * FROM violations ORDER BY id DESC')
+            cur.execute('SELECT * FROM violations ORDER BY id ASC')
             rows = cur.fetchall()
             return [self._row_to_dict(r) for r in rows]
         finally:
@@ -45,8 +42,8 @@ class ViolationRepository:
         try:
             cur = conn.cursor()
             cur.execute(
-                'INSERT INTO violations (name, absen, kelas, violation_type, reason, frequency) VALUES (%s,%s,%s,%s,%s,%s)',
-                (kwargs.get('name'), kwargs.get('absen'), kwargs.get('kelas'), kwargs.get('violation_type'), kwargs.get('reason'), kwargs.get('frequency'))
+                'INSERT INTO violations (name, absen, kelas, violation_type, reason) VALUES (%s,%s,%s,%s,%s)',
+                (kwargs.get('name'), kwargs.get('absen'), kwargs.get('kelas'), kwargs.get('violation_type'), kwargs.get('reason'))
             )
             conn.commit()
             lastid = cur.lastrowid
@@ -81,7 +78,34 @@ class ViolationRepository:
             cur = conn.cursor()
             cur.execute('DELETE FROM violations WHERE id = %s', (vid,))
             conn.commit()
-            return cur.rowcount > 0
+            deleted = cur.rowcount > 0
+            if deleted:
+                self._reorganize_ids()
+            return deleted
+        finally:
+            cur.close()
+            conn.close()
+
+    def _reorganize_ids(self):
+        """Reorganize IDs after deletion to keep them sequential starting from 1"""
+        conn = self.get_connection()
+        try:
+            cur = conn.cursor(dictionary=True)
+            # Get all remaining records ordered by id
+            cur.execute('SELECT * FROM violations ORDER BY id ASC')
+            rows = cur.fetchall()
+            
+            # Truncate table and reset auto_increment
+            cur.execute('TRUNCATE TABLE violations')
+            conn.commit()
+            
+            # Re-insert data with new sequential IDs
+            for data in rows:
+                cur.execute(
+                    'INSERT INTO violations (name, absen, kelas, violation_type, reason) VALUES (%s,%s,%s,%s,%s)',
+                    (data['name'], data['absen'], data['kelas'], data['violation_type'], data['reason'])
+                )
+            conn.commit()
         finally:
             cur.close()
             conn.close()
